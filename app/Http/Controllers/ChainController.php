@@ -31,7 +31,7 @@ class ChainController extends Controller
                 $errors++;
             }
         }
-        return view('chain.index', ['chain' => $chain, 'errors' => $errors, 'block' => $block]);
+        return view('chain.index', ['chain' => $chain->reverse(), 'errors' => $errors, 'block' => $block]);
     }
 
     public function addtransaction(Request $request)
@@ -41,20 +41,23 @@ class ChainController extends Controller
                 'name' => 'required',
                 'amount' => 'required:number',
                 'currency' => 'required',
-                'todo' => 'required',
+                'memo' => 'required',
             ]);
 
             $last = Chain::orderBy('time', 'desc')->first();
 
+            $hash = isset($last) ? $last->hash : '3e0bc5c84f25c3da6697cde2a05ed695';
+
             $line = '{
-                "action": "'.$request->todo.'",
+                "action": "Transfer",
                 "currency": "'.$request->currency.'",
                 "value": '.$request->amount.',
                 "sender": "'.$request->name.'",
                 "reciever": "Initial",
-                "memo": "simple memo",
-                "lunit": "'.$last->hash.'"
+                "memo": "'.$request->memo.'",
+                "lunit": "'.$hash.'"
             }';
+
             $crypted = Functions::encrypt(gzcompress($line));
 
             $chain = new Chain();
