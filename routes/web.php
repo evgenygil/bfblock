@@ -16,3 +16,6 @@ $router->get('/', function () {
 });
 
 $router->get('/home', 'Controller@index');
+
+$router->get('/chain', 'ChainController@index');
+$router->post('/chain/add', 'ChainController@addtransaction');

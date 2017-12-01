@@ -1,5 +1,7 @@
 <?php
 
+namespace App;
+
 class Functions
 {
     public static function encrypt($string, $key = 5)
