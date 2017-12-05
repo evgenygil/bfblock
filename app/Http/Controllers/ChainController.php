@@ -15,20 +15,54 @@ use Illuminate\Pagination;
 
 class ChainController extends Controller
 {
-    public function view() {
+
+    public function checkFile()
+    {
+
+        $f = 'fdp/chain.bfb';
+
+        $block = null;
+        $errors = null;
+
+        $file_handle = fopen($f, "r");
+        $n = 1;
+        $prev = null;
+
+        while (!feof($file_handle)) {
+            $line = fgets($file_handle);
+
+            $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt(preg_split("/;/", $line)[0])))->lunit;
+            echo "Current line hash: " . $cryptedcurhash ."<br>";
+
+            if ($prev) {
+//                echo "Previous line : " . $prev . "<br><br><br>";
+                var_dump("Previos line hash" . preg_split("/;/", $prev));
+                echo "<br><br><br>";
+            } else echo "Previous line : transaction is first <br><br><br>";
+
+
+            $prev = $line;
+        }
+
+        fclose($file_handle);
+
+    }
+
+    public function view()
+    {
 
         $chain = Chain::all(); // full chain
         $errors = null;        // errors count
         $block = null;         // error block
 
-        for ($i=1; $i<$chain->count(); $i++) {
+        for ($i = 1; $i < $chain->count(); $i++) {
             try {
                 $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt($chain[$i]->value)))->lunit;
             } catch (\ErrorException $e) {
                 $cryptedcurhash = 0;
                 $block = $chain[$i];
             }
-            if ($cryptedcurhash != $chain[$i-1]->hash) {
+            if ($cryptedcurhash != $chain[$i - 1]->hash) {
                 $block = $chain[$i];
                 $errors++;
             }
@@ -61,12 +95,12 @@ class ChainController extends Controller
 
             $line = '{
                 "action": "Transfer",
-                "currency": "'.$request->currency.'",
-                "value": '.$request->amount.',
-                "sender": "'.$request->name.'",
+                "currency": "' . $request->currency . '",
+                "value": ' . $request->amount . ',
+                "sender": "' . $request->name . '",
                 "reciever": "Initial",
-                "memo": "'.$request->memo.'",
-                "lunit": "'.$hash.'"
+                "memo": "' . $request->memo . '",
+                "lunit": "' . $hash . '"
             }';
 
             $crypted = Functions::encrypt(gzcompress($line));
@@ -82,7 +116,7 @@ class ChainController extends Controller
 
             if (file_exists('./fdp/chain.bfb')) {
                 $fp = fopen('./fdp/chain.bfb', 'a');
-                fwrite($fp, $crypted . ";" . $chain->hash ."\r\n");
+                fwrite($fp, $crypted . ";" . $chain->hash . "\r\n");
                 fclose($fp);
             } else echo "<script type='text/javascript'>alert('Transaction added, but backup chain file not found!');</script>";
 

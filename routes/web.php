@@ -20,5 +20,6 @@ $router->get('/about', 'Controller@about');
 
 $router->get('/chain', 'ChainController@index');
 $router->get('/chain/view', 'ChainController@view');
+$router->get('/chain/bfb', 'ChainController@checkFile');
 //$router->get('/view', 'ChainController@view');
 $router->post('/chain/add', 'ChainController@addtransaction');
