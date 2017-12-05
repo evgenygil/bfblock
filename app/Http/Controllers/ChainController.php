@@ -29,19 +29,29 @@ class ChainController extends Controller
         $prev = null;
 
         while (!feof($file_handle)) {
+
             $line = fgets($file_handle);
 
-            $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt(preg_split("/;/", $line)[0])))->lunit;
-            echo "Current line hash: " . $cryptedcurhash ."<br>";
+            try {
+                if (count($line) > 0) {
+                    $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt(preg_split("/;/", $line)[0])))->lunit;
+                    echo "Current line ".$n." hash: " . $cryptedcurhash ."<br>";
+                }
+            } catch (\ErrorException $e) {
+                $cryptedcurhash = 0;
+                $block = $n;
+            }
 
-            if ($prev) {
+
+
+//            if ($prev) {
 //                echo "Previous line : " . $prev . "<br><br><br>";
-                var_dump("Previos line hash" . preg_split("/;/", $prev));
-                echo "<br><br><br>";
-            } else echo "Previous line : transaction is first <br><br><br>";
+//                echo "<br><br><br>";
+//            } else echo "Previous line : transaction is first <br><br><br>";
 
 
             $prev = $line;
+            $n++;
         }
 
         fclose($file_handle);
