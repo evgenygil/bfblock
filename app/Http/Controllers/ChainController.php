@@ -11,14 +11,16 @@ namespace App\Http\Controllers;
 use App\Chain;
 use App\Functions;
 use Illuminate\Http\Request;
+use Illuminate\Pagination;
 
 class ChainController extends Controller
 {
     public function index()
     {
-        $chain = Chain::all();
-        $errors = null;
-        $block = null;
+        $chain = Chain::all(); // full chain
+        $errors = null;        // errors count
+        $block = null;         // error block
+
         for ($i=1; $i<$chain->count(); $i++) {
             try {
                 $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt($chain[$i]->value)))->lunit;
@@ -31,7 +33,7 @@ class ChainController extends Controller
                 $errors++;
             }
         }
-        return view('chain.index', ['chain' => $chain->reverse(), 'errors' => $errors, 'block' => $block]);
+        return view('chain.index', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(12), 'errors' => $errors, 'block' => $block]);
     }
 
     public function addtransaction(Request $request)
@@ -65,7 +67,15 @@ class ChainController extends Controller
             $chain->hash = md5($crypted);
             $chain->save();
 
+            if (file_exists('./fdp/chain.bfb')) {
+                $fp = fopen('./fdp/chain.bfb', 'a');
+                fwrite($fp, $crypted . ";" . $chain->hash ."\r\n");
+                fclose($fp);
+            } else echo "<script type='text/javascript'>alert('Transaction added, but backup chain file not found!');</script>";
+
+
         }
+
 
         return redirect('chain');
     }

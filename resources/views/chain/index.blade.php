@@ -3,11 +3,13 @@
 @section('content')
 
     @php($time_start = microtime(true))
-    <h4>Chain status: {{$errors ? 'Error in blocks: ' . (($block->id)-1) . '->' . $block->id : 'OK'}}</h4>
-    <p class="small" style="color: lightgray">checked in {{round(((microtime(true) - $time_start)*1000),5)}} s</p>
+    <div>
+        <h6>Chain status: {{$errors ? 'Error in blocks: ' . (($block->id)-1) . '->' . $block->id : 'OK'}}</h6>
+        <p class="small" style="color: lightgray">checked in {{round(((microtime(true) - $time_start)*1000),5)}} s</p>
+    </div>
     <div>
         <h5>Add transaction</h5>
-        <div class="col-lg-2">
+        <div class="col-lg-4">
             @include('chain._trform')
         </div>
     </div>
@@ -38,6 +40,7 @@
                 @endif
                 </tbody>
             </table>
+            {{ $chain->links() }}
         </div>
     </div>
 
