@@ -15,8 +15,8 @@ use Illuminate\Pagination;
 
 class ChainController extends Controller
 {
-    public function index()
-    {
+    public function view() {
+
         $chain = Chain::all(); // full chain
         $errors = null;        // errors count
         $block = null;         // error block
@@ -33,7 +33,16 @@ class ChainController extends Controller
                 $errors++;
             }
         }
-        return view('chain.index', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(12), 'errors' => $errors, 'block' => $block]);
+
+        return view('chain.view', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(10), 'errors' => $errors, 'block' => $block]);
+
+    }
+
+    public function index()
+    {
+//        $this->view();
+
+        return view('chain.index');
     }
 
     public function addtransaction(Request $request)
@@ -77,10 +86,8 @@ class ChainController extends Controller
                 fclose($fp);
             } else echo "<script type='text/javascript'>alert('Transaction added, but backup chain file not found!');</script>";
 
-
         }
 
-
-        return redirect('chain');
+        return redirect('chain/view');
     }
 }
