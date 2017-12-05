@@ -62,9 +62,13 @@ class ChainController extends Controller
 
             $crypted = Functions::encrypt(gzcompress($line));
 
+            $options = [
+                'cost' => 12,
+            ];
+
             $chain = new Chain();
             $chain->value = $crypted;
-            $chain->hash = md5($crypted);
+            $chain->hash = password_hash($crypted, PASSWORD_BCRYPT, $options);
             $chain->save();
 
             if (file_exists('./fdp/chain.bfb')) {
