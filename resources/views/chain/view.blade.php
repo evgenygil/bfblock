@@ -4,7 +4,7 @@
 
     <div>
         <h6>Chain status <i class="fa fa-link" aria-hidden="true" style="margin-right: 6px"></i> <span class="small">DB: {{$errors ? 'Error in blocks: ' . (($block->id)-1) . '->' . $block->id : 'OK'}}, File : {{$filerrors ? $filerrors.' Errors!' : 'OK'}}</span></h6>
-        <p class="small" style="color: lightgray">checked in {{$time}} s</p>
+        <p class="small" style="color: lightgray">checked in {{$time}} s. Transactions: {{$count}}</p>
     </div>
     <div class="flex-lg-row">
         <h5>Add transaction</h5>

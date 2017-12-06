@@ -58,16 +58,57 @@ class ChainController extends Controller
 
     }
 
+    public function filltrans() {
+
+        for ($i=0; $i<100; $i++) {
+            $last = Chain::orderBy('time', 'desc')->first();
+
+            $hash = isset($last) ? $last->hash : '3e0bc5c84f25c3da6697cde2a05ed695';
+
+            $line = '{
+                "action": "Transfer",
+                "currency": "RUB",
+                "value": ' . rand(1, 20000) . ',
+                "sender": "' . rand(1, 50) . '",
+                "reciever": "Initial",
+                "memo": "' . rand(1, 5000) . '",
+                "lunit": "' . $hash . '"
+            }';
+
+            $crypted = Functions::encrypt(gzcompress($line));
+
+            $options = [
+                'cost' => 12,
+            ];
+
+            $chain = new Chain();
+            $chain->value = $crypted;
+            $chain->hash = password_hash($crypted, PASSWORD_BCRYPT, $options);
+            $chain->save();
+
+            if (file_exists('./fdp/chain.bfb')) {
+                $fp = fopen('./fdp/chain.bfb', 'a');
+                fwrite($fp, "\r\n" . $crypted . "-^-" . $chain->hash);
+                fclose($fp);
+            };
+
+            $i++;
+            sleep(2);
+        }
+    }
+
+
     public function view()
     {
 
         $chain = Chain::all(); // full chain
         $errors = null;        // errors count
         $block = null;         // error block
+        $transactions_cnt = $chain->count();
 
-        $time_start = microtime(true);
+        $start = microtime(true);
 
-        for ($i = 1; $i < $chain->count(); $i++) {
+        for ($i = 1; $i < $transactions_cnt; $i++) {
             try {
                 $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt($chain[$i]->value)))->lunit;
             } catch (\ErrorException $e) {
@@ -82,9 +123,9 @@ class ChainController extends Controller
 
         $filerrors = $this->checkFile();
 
-        $end_time = round(((microtime(true) - $time_start)*1000),5);
+        $end_time = round(microtime(true) - $start, 4);
 
-        return view('chain.view', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(10), 'errors' => $errors, 'block' => $block, 'time' => $end_time, 'filerrors' => $filerrors]);
+        return view('chain.view', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(50), 'errors' => $errors, 'block' => $block, 'time' => $end_time, 'filerrors' => $filerrors, 'count' => $transactions_cnt]);
 
     }
 
