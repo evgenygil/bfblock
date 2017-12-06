@@ -2,10 +2,9 @@
 
 @section('content')
 
-    @php($time_start = microtime(true))
     <div>
-        <h6>Chain status: {{$errors ? 'Error in blocks: ' . (($block->id)-1) . '->' . $block->id : 'OK'}}</h6>
-        <p class="small" style="color: lightgray">checked in {{round(((microtime(true) - $time_start)*1000),5)}} s</p>
+        <h6>Chain status <i class="fa fa-link" aria-hidden="true" style="margin-right: 6px"></i> <span class="small">DB: {{$errors ? 'Error in blocks: ' . (($block->id)-1) . '->' . $block->id : 'OK'}}, File : {{$filerrors ? $filerrors.' Errors!' : 'OK'}}</span></h6>
+        <p class="small" style="color: lightgray">checked in {{$time}} s</p>
     </div>
     <div class="flex-lg-row">
         <h5>Add transaction</h5>

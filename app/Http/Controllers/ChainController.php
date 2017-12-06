@@ -21,8 +21,8 @@ class ChainController extends Controller
 
         $f = 'fdp/chain.bfb';
 
-        $block = null;
-        $errors = null;
+//        $block = null;
+        $errors = 0;
 
         $file_handle = fopen($f, "r");
         $n = 1;
@@ -32,29 +32,29 @@ class ChainController extends Controller
 
             $line = fgets($file_handle);
 
-            try {
-                if (count($line) > 0) {
-                    $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt(preg_split("/;/", $line)[0])))->lunit;
-                    echo "Current line ".$n." hash: " . $cryptedcurhash ."<br>";
+            if (count($line) > 0) {
+                try {
+                    $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt(explode("-^-", $line)[0])))->lunit;
+                } catch (\ErrorException $e) {
+                    $cryptedcurhash = 0;
                 }
-            } catch (\ErrorException $e) {
-                $cryptedcurhash = 0;
-                $block = $n;
+
+                if ($prev != null) {
+                    if (strcmp($cryptedcurhash, trim((explode("-^-", $prev)[1]), "\r\n")) != 0) {
+                        $errors++;
+                    }
+                }
+
+                $prev = $line;
+
+                $n++;
+
             }
-
-
-
-//            if ($prev) {
-//                echo "Previous line : " . $prev . "<br><br><br>";
-//                echo "<br><br><br>";
-//            } else echo "Previous line : transaction is first <br><br><br>";
-
-
-            $prev = $line;
-            $n++;
         }
 
         fclose($file_handle);
+
+        return $errors;
 
     }
 
@@ -65,6 +65,8 @@ class ChainController extends Controller
         $errors = null;        // errors count
         $block = null;         // error block
 
+        $time_start = microtime(true);
+
         for ($i = 1; $i < $chain->count(); $i++) {
             try {
                 $cryptedcurhash = json_decode(gzuncompress(Functions::decrypt($chain[$i]->value)))->lunit;
@@ -72,20 +74,22 @@ class ChainController extends Controller
                 $cryptedcurhash = 0;
                 $block = $chain[$i];
             }
-            if ($cryptedcurhash != $chain[$i - 1]->hash) {
+            if (strcmp($cryptedcurhash, $chain[$i - 1]->hash) != 0) {
                 $block = $chain[$i];
                 $errors++;
             }
         }
 
-        return view('chain.view', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(10), 'errors' => $errors, 'block' => $block]);
+        $filerrors = $this->checkFile();
+
+        $end_time = round(((microtime(true) - $time_start)*1000),5);
+
+        return view('chain.view', ['chain' => Chain::OrderBy('Time', 'desc')->paginate(10), 'errors' => $errors, 'block' => $block, 'time' => $end_time, 'filerrors' => $filerrors]);
 
     }
 
     public function index()
     {
-//        $this->view();
-
         return view('chain.index');
     }
 
@@ -126,7 +130,7 @@ class ChainController extends Controller
 
             if (file_exists('./fdp/chain.bfb')) {
                 $fp = fopen('./fdp/chain.bfb', 'a');
-                fwrite($fp, $crypted . ";" . $chain->hash . "\r\n");
+                fwrite($fp, "\r\n" . $crypted . "-^-" . $chain->hash);
                 fclose($fp);
             } else echo "<script type='text/javascript'>alert('Transaction added, but backup chain file not found!');</script>";
 
