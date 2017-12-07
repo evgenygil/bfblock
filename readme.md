@@ -7,6 +7,6 @@ BFBlock it's a simple blockchain for small solutions, that allows to make transa
 ### Speed test
 Chain verification speed (1012 transactions, CPU Core i3 4160 3.6Ghz, 8Gb DDR3, Nginx 1.11, PHP-FPM):
 
-DB: 0.08 sec
-File: 0.08 sec
-DB + File: 0.15-0.17 sec
+ - DB: 0.08 sec
+ - File: 0.08 sec
+ - DB + File: 0.15-0.17 sec
