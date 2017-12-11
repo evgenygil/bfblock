@@ -10,3 +10,6 @@ Chain verification speed (1012 transactions, CPU Core i3 4160 3.6Ghz, 8Gb DDR3, 
  - DB: 0.08 sec
  - File: 0.08 sec
  - DB + File: 0.15-0.17 sec
+
+Test view
+http://bfblock.gurondex.io/chain/view
